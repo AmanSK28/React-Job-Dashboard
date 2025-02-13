@@ -17,13 +17,20 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const BarChart = () => {
   // State to store chart data
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState({
+    labels: ["Loading...", "Loading...", "Loading...", "Loading...", "Loading..."], // Placeholder labels
+    datasets: [
+      {
+        label: "Fetching Data...",
+        data: [5, 5, 5, 5, 5], // Placeholder bars
+        backgroundColor: ["#d1d5db", "#d1d5db", "#d1d5db", "#d1d5db", "#d1d5db"], // Grey bars
+      },
+    ],
+  });
   const [loading, setLoading] = useState(true);
 
   // Fetch job data from the API when the component loads
   useEffect(() => {
-    console.log("API Key Loaded:", import.meta.env.VITE_RAPIDAPI_KEY); // Debug API Key
-
     const fetchJobData = async () => {
       try {
         const options = {
@@ -32,36 +39,28 @@ const BarChart = () => {
           params: {
             query: "Software Engineer",
             page: "1",
-            num_pages: "10", // Fetch more data for better accuracy
+            num_pages: "3", // Reduced pages for faster response
           },
           headers: {
-            "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY, // Secure API key usage
+            "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY,
             "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
           },
         };
 
         const response = await axios.request(options);
-        console.log("API Response:", response.data); // Debug API response
-
-        const jobs = response.data.data; // Extract job postings
+        const jobs = response.data.data;
 
         if (!jobs || jobs.length === 0) {
-          console.warn("No job data found.");
           setLoading(false);
           return;
         }
 
-        // List of technologies/tools to track in job descriptions
-        const technologyKeywords = [
-          "Python", "Java", "JavaScript", "React", "Node.js", "C++", "AWS",
-          "Docker", "Kubernetes", "SQL", "Git", "CI/CD", "TypeScript", "Azure",
-          "Linux", "Jenkins", "MongoDB", "PostgreSQL", "GraphQL", "Terraform"
-        ];
-
-        // Count occurrences of each technology in job descriptions
+        // Extract technologies
+        const technologyKeywords = ["Python", "Java", "JavaScript", "React", "AWS", "SQL"];
         const techCounts = {};
+
         jobs.forEach((job) => {
-          const description = job.job_description.toLowerCase(); // Convert to lowercase for consistency
+          const description = job.job_description.toLowerCase();
           technologyKeywords.forEach((tech) => {
             if (description.includes(tech.toLowerCase())) {
               techCounts[tech] = (techCounts[tech] || 0) + 1;
@@ -69,20 +68,16 @@ const BarChart = () => {
           });
         });
 
-        console.log("Extracted Technologies:", techCounts); // Debug extracted techs
-
-        // Sort technologies by count and get top 5
         const sortedTech = Object.entries(techCounts)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 5);
 
-        // Prepare data for the bar chart
         setChartData({
-          labels: sortedTech.map(([tech]) => tech), // Technology names
+          labels: sortedTech.map(([tech]) => tech),
           datasets: [
             {
               label: "Most Required Software Engineering Tools",
-              data: sortedTech.map(([_, count]) => count), // Count values
+              data: sortedTech.map(([_, count]) => count),
               backgroundColor: ["#34D399", "#3B82F6", "#FBBF24", "#F87171", "#A78BFA"],
             },
           ],
@@ -95,13 +90,15 @@ const BarChart = () => {
       }
     };
 
-    fetchJobData(); // Call API function
+    fetchJobData();
   }, []);
 
   return (
     <div className="w-1/2 mx-auto mt-10">
-      <h2 className="text-xl font-bold text-center mb-4">Most Required Software Engineering Tools</h2>
-      {loading ? <p>Loading chart...</p> : chartData ? <Bar data={chartData} /> : <p>No data available.</p>}
+      <h2 className="text-xl font-bold text-center mb-4">
+        Most Required Software Engineering Tools
+      </h2>
+      <Bar data={chartData} /> {/* Always show chart, even while loading */}
     </div>
   );
 };
