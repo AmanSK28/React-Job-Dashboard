@@ -1,7 +1,8 @@
+// Import React and Bar chart component
 import React from "react";
 import { Bar } from "react-chartjs-2";
 
-// Register Chart.js components
+// Import and register necessary Chart.js components
 import {
   Chart as ChartJS,
   BarElement,
@@ -14,7 +15,7 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const BarChart = () => {
-  // **Hardcoded Sample Data for Staging**
+  // Sample data for the bar chart
   const chartData = {
     labels: ["Python", "AWS", "React", "SQL", "Docker"],
     datasets: [
@@ -36,4 +37,4 @@ const BarChart = () => {
   );
 };
 
-export default BarChart;
+export default BarChart; // Export the component
